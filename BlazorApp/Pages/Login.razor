@@ -1,0 +1,58 @@
+﻿<h3>Login</h3>
+@page "/login"
+@using BlazorApp.Data
+@inject Microsoft.AspNetCore.Components.NavigationManager Navigation
+@inject ICustomerRazorService customerService
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+<div class="col-sm-6"></div>
+<div class="col-sm-3">
+    <h2></h2>
+    <div class="form-group">
+        <label asp-for="ContactName" class="control-label">Username</label>
+        <input type="text" asp-for="ContactName" class="form-control" @bind="model.Username" />
+    </div>
+    <div class="form-group">
+        <label asp-for="ContactName" class="control-label">Password</label>
+        <input type="password" asp-for="ContactName" class="form-control" @bind="model.Passsword" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary" @onclick="@login">Save</button>
+        <button class="btn btn-warning" @onclick="@cancel">Cancel</button>
+    </div>
+    Use m2m/secret or m2m.short/secret
+    <div style="color:red">@errorMessage</div>
+</div>
+<div class="col-sm-3"></div>
+
+@code {
+    public BlazorApp.Models.LoginModel model = new Models.LoginModel();
+    string returnUrl { get; set; }
+    string errorMessage { get; set; }
+    void cancel()
+    {
+        Navigation.NavigateTo("/");
+    }
+    public async Task login()
+    {
+        var loggedIn = await customerService.GetApiToken(model.Username, model.Passsword);
+        if (!string.IsNullOrEmpty(loggedIn))
+        {
+            await localStorage.SetItemAsync("apiToken", loggedIn);
+            Navigation.NavigateTo("/" + returnUrl);
+        }
+        else
+        {
+            errorMessage = "Wrong username or password";
+        }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await localStorage.RemoveItemAsync("apiToken");
+        errorMessage = "";
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var param))
+        {
+            returnUrl = param.First();
+        }
+    }
+}
