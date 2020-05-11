@@ -54,7 +54,7 @@ namespace BlazorApp.Controllers
             }
 
             _customerService.Update(id, customerIn);
-            return NoContent();
+            return Ok();
         }
         [HttpDelete("{id:length(24)}")]
         public IActionResult Delete(string id)
@@ -68,7 +68,7 @@ namespace BlazorApp.Controllers
 
             _customerService.Remove(customer.Id);
 
-            return NoContent();
+            return Ok();
         }
     }
 }

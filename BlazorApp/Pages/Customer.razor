@@ -9,12 +9,13 @@
 
 @if (customers == null)
 {
-    <p><em>Table is empty...</em></p>
+    <p><em>@welcomeMessage</em></p>
 }
 else
 {
-    <a class="btn btn-danger" @onclick="RemoveToken">Logout</a>
-    <table class="table">
+    <a class="btn btn-danger" @onclick="RemoveToken" style="float:right;color:white">Logout</a>
+    <br />
+<table class="table">
         <thead>
             <tr>
                 <th>Company Name</th>
@@ -46,9 +47,10 @@ else
 
     private List<BlazorApp.Models.Customer> customers;
     public string token { get; set; }
+    public string welcomeMessage { get; set; }
     protected override async Task OnInitializedAsync()
     {
-
+        welcomeMessage = "Customers are loading ...";
         token = await localStorage.GetItemAsync<string>("apiToken");
         if (string.IsNullOrEmpty(token))
         {
@@ -63,6 +65,10 @@ else
                 Navigation.NavigateTo("/login?returnUrl=customers");
             }
             customers = data.Customers;
+            if(customers == null || customers.Count == 0)
+            {
+                welcomeMessage = "There is no data";
+            }
         }
     }
 

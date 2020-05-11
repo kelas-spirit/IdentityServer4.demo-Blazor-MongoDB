@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Newtonsoft.Json;
+using Services.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,10 +30,12 @@ namespace BlazorApp.Data
     public class CustomerRazorService: ICustomerRazorService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public CustomerRazorService(IHttpContextAccessor httpContextAccessor)
+        private readonly IIdServerDemoService _idServerDemoService;
+        
+        public CustomerRazorService(IHttpContextAccessor httpContextAccessor, IIdServerDemoService idServerDemoService)
         {
             _httpContextAccessor = httpContextAccessor;
+            _idServerDemoService = idServerDemoService;
         }
         public async Task<ResponseCustomerApiModel> GetCustomersAsync(string token)
         {
@@ -159,26 +162,8 @@ namespace BlazorApp.Data
         {
             try
             {
-                var apiUrl = "https://demo.identityserver.io/connect/token";
-                using (HttpClient client = new HttpClient())
-                {
-                    var byteArray = Encoding.ASCII.GetBytes(username+":"+password);
-                    client.DefaultRequestHeaders.Add("Authorization", "Basic " + Convert.ToBase64String(byteArray));
-                    var parameters = new Dictionary<string, string> {
-                        { "grant_type", "client_credentials" }
-                    };
-                    var encodedContent = new FormUrlEncodedContent(parameters);
-                    var response = await client.PostAsync(apiUrl, encodedContent);
-                    if (response.StatusCode == HttpStatusCode.OK)
-                    {
-                        var contents = await response.Content.ReadAsStringAsync();
-                        var token = JsonConvert.DeserializeObject<Models.TokenResponse>(contents);
-                        // Set Token to session 
-                        return token.access_token;
-                    }
-                   
-                    return "";
-                }
+                var token = await  _idServerDemoService.GetApiToken(username, password);
+                return token;
             }
             catch (Exception e)
             {

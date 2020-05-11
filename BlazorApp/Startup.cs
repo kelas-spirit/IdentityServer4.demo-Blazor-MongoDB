@@ -46,6 +46,7 @@ namespace BlazorApp
 
             services.AddTransient<ICustomerRazorService, CustomerRazorService>();
             services.AddTransient<ICustomerService, CustomerService>();
+            services.AddTransient<IIdServerDemoService, IdServerDemoService>();
 
             // requires using Microsoft.Extensions.Options
             services.Configure<CustomerDatabaseSettings>(
